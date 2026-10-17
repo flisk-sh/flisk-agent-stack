@@ -1,0 +1,15 @@
+{
+  "appName": "agent",
+  "domain": "agents",
+  "type": "agent",
+  "stack": "agents",
+  "port": 4100,
+  "agent": {
+    "runtime": "custom",
+    "durability": "files"
+  },
+  "healthCheck": {
+    "enabled": true,
+    "path": "/health"
+  }
+}

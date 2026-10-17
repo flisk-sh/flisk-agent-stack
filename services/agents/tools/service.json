@@ -1,0 +1,11 @@
+{
+  "appName": "tools",
+  "domain": "agents",
+  "type": "mcp",
+  "stack": "agents",
+  "port": 4101,
+  "healthCheck": {
+    "enabled": true,
+    "path": "/health"
+  }
+}
