@@ -1,5 +1,7 @@
 # TDK Agent Stack
 
+[![Uses TDK CLI](https://img.shields.io/badge/Uses-TDK%20CLI-blue?style=flat-square&logo=github)](https://github.com/tdk-landscape/tdk-cli-core)
+
 Starter landscape for AI agents on TDK: a Bun agent resource, an MCP tool server, Postgres, and NATS.
 
 ## Prerequisites
