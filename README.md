@@ -13,6 +13,9 @@ Starter landscape for AI agents on TDK: a Bun agent resource, an MCP tool server
 
 ## Quick start
 
+
+> **Repository-pinned CLI (optional):** Run `bun install` from the repository root to install the version pinned in `package.json`. Use `bun run tdk:project` to initialize project config, `bun run tdk:dry-run` to preview startup, or `bun run tdk:up -- <stack>` to start a stack. The global npm and standalone binary installation paths remain available.
+
 ```bash
 git clone https://github.com/tdk-landscape/tdk-agent-stack.git
 cd tdk-agent-stack
