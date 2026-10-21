@@ -5,12 +5,12 @@
     "": {
       "name": "tdk-agent-stack",
       "devDependencies": {
-        "@tdk-landscape/tdk-cli-core": "1.3.186",
+        "@flisk-sh/flisk": "1.3.190",
       },
     },
   },
   "packages": {
-    "@tdk-landscape/tdk-cli-core": ["@tdk-landscape/tdk-cli-core@1.3.186", "", { "dependencies": { "commander": "^15.0.0", "handlebars": "^4.7.8" }, "bin": { "tdk": "cli/bin/tdk.js", "tdk-cli": "cli/bin/tdk.js" } }, "sha512-5nE2sdKIi1MNZqor+XylZoQbahP55IW9oThBiC1kXNTLvg2qUZimeATjVpE+vScMkobmfSUUvi7leRZeF7KoYQ=="],
+    "@flisk-sh/flisk": ["@flisk-sh/flisk@1.3.190", "", { "dependencies": { "commander": "^15.0.0", "handlebars": "^4.7.8" }, "bin": { "tdk": "cli/bin/flisk.js", "flisk": "cli/bin/flisk.js", "tdk-cli": "cli/bin/flisk.js" } }, "sha512-z/SD1fV6a07S9z7jmDjXtiI6BcI2dIHTv4/2CQf8mXgtVq0mzRn7zogC6TTv32EFIwNepp8LbJ7mtBbUGBwIOA=="],
 
     "commander": ["commander@15.0.0", "", {}, "sha512-z67u4ZhzCL/Tydu1lJARtEZYWbWaN7oYLHbsuzocr6y4N6WZAagG3RQ4FW61V1/0+jImpj293XfrcYnd1qxtPg=="],
 
