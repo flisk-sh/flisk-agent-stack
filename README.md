@@ -47,4 +47,4 @@ tdk resource my-agent --type agent --stack agents --durability files
 tdk resource my-tools --type mcp --stack agents
 ```
 
-See [tdk-cli-core](https://github.com/flisk-sh/flisk) and the website [llms.txt](https://flisk.sh/llms.txt) for the full contract.
+See [flisk](https://github.com/flisk-sh/flisk) and the website [llms.txt](https://flisk.sh/llms.txt) for the full contract.
