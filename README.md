@@ -1,6 +1,6 @@
 # TDK Agent Stack
 
-[![Uses TDK CLI](https://img.shields.io/badge/Uses-TDK%20CLI-blue?style=flat-square&logo=github)](https://github.com/tdk-landscape/tdk-cli-core)
+[![Uses TDK CLI](https://img.shields.io/badge/Uses-TDK%20CLI-blue?style=flat-square&logo=github)](https://github.com/flisk-sh/flisk)
 
 Starter landscape for AI agents on TDK: a Bun agent resource, an MCP tool server, Postgres, and NATS.
 
@@ -9,7 +9,7 @@ Starter landscape for AI agents on TDK: a Bun agent resource, an MCP tool server
 - Docker running
 - Tilt installed
 - Bun installed
-- [TDK CLI](https://github.com/tdk-landscape/tdk-cli-core)
+- [TDK CLI](https://github.com/flisk-sh/flisk)
 
 ## Quick start
 
@@ -17,7 +17,7 @@ Starter landscape for AI agents on TDK: a Bun agent resource, an MCP tool server
 > **Repository-pinned CLI (optional):** Run `bun install` from the repository root to install the version pinned in `package.json`. Use `bun run tdk:project` to initialize project config, `bun run tdk:dry-run` to preview startup, or `bun run tdk:up -- <stack>` to start a stack. The global npm and standalone binary installation paths remain available.
 
 ```bash
-git clone https://github.com/tdk-landscape/tdk-agent-stack.git
+git clone https://github.com/flisk-sh/tdk-agent-stack.git
 cd tdk-agent-stack
 tdk project --yes
 tdk up
@@ -47,4 +47,4 @@ tdk resource my-agent --type agent --stack agents --durability files
 tdk resource my-tools --type mcp --stack agents
 ```
 
-See [tdk-cli-core](https://github.com/tdk-landscape/tdk-cli-core) and the website [llms.txt](https://tdk-landscape.github.io/tdk-website/llms.txt) for the full contract.
+See [tdk-cli-core](https://github.com/flisk-sh/flisk) and the website [llms.txt](https://flisk.sh/llms.txt) for the full contract.
