@@ -1,0 +1,13 @@
+{
+  "appName": "agent-migrator",
+  "appType": "migrator",
+  "stack": "agents",
+  "port": 7420,
+  "featuresEnabled": [
+    "prisma"
+  ],
+  "dependsOn": [
+    "postgres"
+  ],
+  "schemaVersion": 1
+}

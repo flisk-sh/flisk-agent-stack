@@ -1,0 +1,10 @@
+// Prisma owns the migrations (prisma/migrations), applied by `prisma migrate deploy` at startup.
+// flisk_agent_sessions carries no Prisma models: the agent reads and writes it with its own Postgres client.
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
