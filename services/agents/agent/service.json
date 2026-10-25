@@ -1,15 +1,29 @@
 {
+  "port": 4001,
+  "dependsOn": [
+    "agent-migrator"
+  ],
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": "."
+  },
+  "dev": {
+    "command": "bun run dev",
+    "watch": [
+      "src/**/*"
+    ]
+  },
+  "healthCheckPath": "/health",
+  "$schema": "https://flisk.sh/schema.service.json",
+  "schemaVersion": 1,
   "appName": "agent",
-  "domain": "agents",
+  "appType": "agent",
+  "featuresEnabled": [],
+  "name": "agent",
   "type": "agent",
   "stack": "agents",
-  "port": 4100,
   "agent": {
     "runtime": "custom",
-    "durability": "files"
-  },
-  "healthCheck": {
-    "enabled": true,
-    "path": "/health"
+    "durability": "postgres"
   }
 }
