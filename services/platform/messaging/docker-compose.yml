@@ -1,9 +1,9 @@
 # Local stand-in for a managed queue (SQS / Pub/Sub / Service Bus): NATS JetStream.
 #
-# TDK loads this file when it exists (engine: infra-loader.star). It does not
-# generate it. Names are fixed by TDK: the container must be called
+# Flisk loads this file when it exists (engine: infra-loader.star). It does not
+# generate it. Names are fixed by Flisk: the container must be called
 # <project>_nats (that is the host in TILT_NATS_URL), and the `redis` service
-# must exist because TDK registers both.
+# must exist because Flisk registers both.
 services:
   nats:
     image: nats:2.10-alpine
@@ -20,7 +20,7 @@ services:
       timeout: 3s
       retries: 20
 
-  # Registered by TDK but never started (auto_init=False). Kept so the file loads.
+  # Registered by Flisk but never started (auto_init=False). Kept so the file loads.
   redis:
     image: redis:7-alpine
     container_name: tdk_agent_stack_redis

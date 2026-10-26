@@ -1,2 +1,2 @@
-# TDK discovers services from service.json files.
-# Run `tdk up` from this directory after `tdk project --yes`.
+# Flisk discovers services from service.json files.
+# Run `flisk up` from this directory after `flisk project --yes`.
