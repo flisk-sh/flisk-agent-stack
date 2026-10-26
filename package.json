@@ -1,5 +1,5 @@
 {
-  "name": "tdk-agent-stack",
+  "name": "flisk-agent-stack",
   "private": true,
   "type": "module",
   "scripts": {

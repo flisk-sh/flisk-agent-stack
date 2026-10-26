@@ -1,7 +1,7 @@
 {
   "version": "1.0",
   "project": {
-    "name": "tdk-agent-stack",
+    "name": "flisk-agent-stack",
     "version": "1.0.0"
   },
   "phases": {
