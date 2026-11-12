@@ -12,9 +12,19 @@ const PORT = Number(process.env.PORT || 3000);
 const DRAIN_TIMEOUT_MS = 10_000;
 const DATABASE_URL = process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/postgres';
 
+// A tool entry records one tool call, so the stored session shows what the agent did, not only what it said.
+type Message =
+  | { role: 'user' | 'agent'; content: string; at: string }
+  | { role: 'tool'; name: string; input: unknown; output: unknown; at: string };
+
 interface Checkpoint {
   sessionId: string;
-  messages: Array<{ role: 'user' | 'agent'; content: string; at: string }>;
+  messages: Message[];
+}
+
+// A turn is one user message; tool entries sit between the user message and the reply, so do not count messages / 2.
+function turnCount(checkpoint: Checkpoint): number {
+  return checkpoint.messages.filter((m) => m.role === 'user').length;
 }
 
 // The flisk_agent_sessions table is created by agent-migrator before this process starts.
@@ -52,6 +62,20 @@ const store = {
       return { sessionId, messages: [] };
     }
   },
+  async list(): Promise<Array<{ sessionId: string; turns: number; updatedAt: string }>> {
+    const c = await getClient();
+    const res = await c.query(
+      `SELECT session_id, updated_at,
+              (SELECT count(*) FROM jsonb_array_elements(messages) m WHERE m->>'role' = 'user') AS turns
+       FROM flisk_agent_sessions
+       ORDER BY updated_at DESC`,
+    );
+    return res.rows.map((r) => ({
+      sessionId: r.session_id,
+      turns: Number(r.turns),
+      updatedAt: new Date(r.updated_at).toISOString(),
+    }));
+  },
   async save(checkpoint: Checkpoint): Promise<void> {
     const c = await getClient();
     await c.query(
@@ -74,11 +98,25 @@ const store = {
   },
 };
 
+// Tools this agent can call. `echo` mirrors the tool in services/agents/tools; replace the body with a call to that
+// MCP server (the `tools` resource) when you add real tools.
+const tools: Record<string, (input: any) => Promise<unknown>> = {
+  echo: async (input) => ({ message: String(input?.message ?? '') }),
+};
+
+// Call a tool and record it in the checkpoint, so GET /session shows the call and its result.
+async function callTool(checkpoint: Checkpoint, name: string, input: unknown): Promise<unknown> {
+  const output = await tools[name](input);
+  checkpoint.messages.push({ role: 'tool', name, input, output, at: new Date().toISOString() });
+  return output;
+}
+
 // Replace this with the agent's work: call your model, run tools, return the reply. Keep it a pure function of the
 // checkpoint so a resumed session continues from what was saved.
 async function runTurn(checkpoint: Checkpoint, input: string): Promise<string> {
-  // The caller has already appended this turn's user message, so the turn number is half the message count, rounded up.
-  return 'received ' + input + ' (turn ' + Math.ceil(checkpoint.messages.length / 2) + ')';
+  // The caller has already appended this turn's user message, so the turn number is the count of user messages.
+  await callTool(checkpoint, 'echo', { message: input });
+  return `received ${input} (turn ${turnCount(checkpoint)})`;
 }
 
 let draining = false;
@@ -127,14 +165,18 @@ const server = createServer(async (req, res) => {
       const reply = await runTurn(checkpoint, input);
       checkpoint.messages.push({ role: 'agent', content: reply, at: new Date().toISOString() });
       await store.save(checkpoint);
-      return sendJson(res, 200, { sessionId, reply, turns: checkpoint.messages.length / 2 });
+      return sendJson(res, 200, { sessionId, reply, turns: turnCount(checkpoint) });
+    }
+
+    if (url.pathname === '/sessions' && req.method === 'GET') {
+      return sendJson(res, 200, { sessions: await store.list() });
     }
 
     if (url.pathname === '/session' && req.method === 'GET') {
       const sessionId = String(req.headers['x-session-id'] ?? '');
       if (!/^[A-Za-z0-9_-]{1,128}$/.test(sessionId)) return sendJson(res, 400, { error: 'x-session-id header is required' });
       const checkpoint = await store.load(sessionId);
-      return sendJson(res, 200, { sessionId, turns: checkpoint.messages.length / 2, messages: checkpoint.messages });
+      return sendJson(res, 200, { sessionId, turns: turnCount(checkpoint), messages: checkpoint.messages });
     }
 
     return sendJson(res, 404, { error: 'not_found' });
