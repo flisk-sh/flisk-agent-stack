@@ -49,7 +49,10 @@ Once `flisk up agents` is running, find the agent's URL with `flisk networks` an
 AGENT_URL=<the agent URL from flisk networks>
 curl -s -X POST -H 'x-session-id: demo' -H 'content-type: application/json' -d '{"input":"hello"}' "$AGENT_URL/turn"
 curl -s -H 'x-session-id: demo' "$AGENT_URL/session"
+curl -s "$AGENT_URL/sessions"
 ```
+
+`/session` returns the stored messages, including a `{ "role": "tool", "name", "input", "output", "at" }` entry for each tool call (the placeholder turn calls `echo` once). `GET /sessions` lists every stored session with its turn count.
 
 `/ready` answers 503 while the checkpoint store is unreachable. The replacement for the placeholder turn lives in `runTurn` in [`services/agents/agent/src/index.ts`](services/agents/agent/src/index.ts).
 
