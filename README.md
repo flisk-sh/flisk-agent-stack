@@ -52,7 +52,9 @@ curl -s -H 'x-session-id: demo' "$AGENT_URL/session"
 curl -s "$AGENT_URL/sessions"
 ```
 
-`/session` returns the stored messages, including a `{ "role": "tool", "name", "input", "output", "at" }` entry for each tool call (the placeholder turn calls `echo` once). `GET /sessions` lists every stored session with its turn count.
+`/session` returns the stored messages, including a `{ "role": "tool", "name", "input", "output", "at" }` entry for each tool call (the placeholder turn calls `echo` once). `GET /sessions` lists stored sessions with their turn counts.
+
+`GET /sessions` returns at most 500 sessions, newest first, and `total` counts all stored sessions. Each row includes the CLI fields `sessionId`, `lastActivity` (ISO timestamp), `status` (`active` while this process handles a turn, otherwise `idle`), and `checkpointBytes` (the UTF-8 size of the stored JSON transcript). The existing `turns` and `updatedAt` fields remain available. Activity is process-local: it is not a cross-instance status or a lock that serializes concurrent turns.
 
 `/ready` answers 503 while the checkpoint store is unreachable. The replacement for the placeholder turn lives in `runTurn` in [`services/agents/agent/src/index.ts`](services/agents/agent/src/index.ts).
 

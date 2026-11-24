@@ -29,6 +29,8 @@ function turnCount(checkpoint: Checkpoint): number {
 
 // The flisk_agent_sessions table is created by agent-migrator before this process starts.
 let client: Client | null = null;
+// Activity belongs to this process; a count preserves overlapping requests for one session.
+const activeTurns = new Map<string, number>();
 
 async function getClient(): Promise<Client> {
   if (client) return client;
@@ -62,19 +64,27 @@ const store = {
       return { sessionId, messages: [] };
     }
   },
-  async list(): Promise<Array<{ sessionId: string; turns: number; updatedAt: string }>> {
+  async list() {
     const c = await getClient();
     const res = await c.query(
-      `SELECT session_id, updated_at,
+      `SELECT session_id, updated_at, count(*) OVER () AS total,
+              octet_length(messages::text) AS checkpoint_bytes,
               (SELECT count(*) FROM jsonb_array_elements(messages) m WHERE m->>'role' = 'user') AS turns
        FROM flisk_agent_sessions
-       ORDER BY updated_at DESC`,
+       ORDER BY updated_at DESC, session_id
+       LIMIT 500`,
     );
-    return res.rows.map((r) => ({
-      sessionId: r.session_id,
-      turns: Number(r.turns),
-      updatedAt: new Date(r.updated_at).toISOString(),
-    }));
+    return {
+      total: res.rows.length ? Number(res.rows[0].total) : 0,
+      sessions: res.rows.map((r) => ({
+        sessionId: r.session_id as string,
+        turns: Number(r.turns),
+        updatedAt: new Date(r.updated_at).toISOString(),
+        lastActivity: new Date(r.updated_at).toISOString(),
+        status: activeTurns.has(r.session_id) ? 'active' : 'idle',
+        checkpointBytes: Number(r.checkpoint_bytes),
+      })),
+    };
   },
   async save(checkpoint: Checkpoint): Promise<void> {
     const c = await getClient();
@@ -139,6 +149,7 @@ const server = createServer(async (req, res) => {
   inFlight++;
   res.on('close', () => inFlight--);
   const url = new URL(req.url ?? '/', 'http://localhost');
+  let activeSession: string | undefined;
 
   try {
     if (url.pathname === '/health') {
@@ -158,6 +169,8 @@ const server = createServer(async (req, res) => {
       if (!/^[A-Za-z0-9_-]{1,128}$/.test(sessionId)) {
         return sendJson(res, 400, { error: 'x-session-id header is required (1-128 letters, digits, - or _)' });
       }
+      activeSession = sessionId;
+      activeTurns.set(sessionId, (activeTurns.get(sessionId) ?? 0) + 1);
       const body = await readJson(req);
       const input = String(body.input ?? '');
       const checkpoint = await store.load(sessionId);
@@ -169,7 +182,7 @@ const server = createServer(async (req, res) => {
     }
 
     if (url.pathname === '/sessions' && req.method === 'GET') {
-      return sendJson(res, 200, { sessions: await store.list() });
+      return sendJson(res, 200, await store.list());
     }
 
     if (url.pathname === '/session' && req.method === 'GET') {
@@ -183,6 +196,12 @@ const server = createServer(async (req, res) => {
   } catch (error) {
     console.error('[agent] request failed:', error);
     return sendJson(res, 500, { error: 'internal_error' });
+  } finally {
+    if (activeSession !== undefined) {
+      const remaining = (activeTurns.get(activeSession) ?? 1) - 1;
+      if (remaining === 0) activeTurns.delete(activeSession);
+      else activeTurns.set(activeSession, remaining);
+    }
   }
 });
 
