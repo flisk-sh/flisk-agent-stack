@@ -1,9 +1,8 @@
 # Local stand-in for a managed queue (SQS / Pub/Sub / Service Bus): NATS JetStream.
 #
 # Flisk loads this file when it exists (engine: infra-loader.star). It does not
-# generate it. Names are fixed by Flisk: the container must be called
-# <project>_nats (that is the host in TILT_NATS_URL), and the `redis` service
-# must exist because Flisk registers both.
+# generate it. The container must be called <project>_nats because that is the
+# host in TILT_NATS_URL.
 services:
   nats:
     image: nats:2.10-alpine
@@ -19,14 +18,6 @@ services:
       interval: 5s
       timeout: 3s
       retries: 20
-
-  # Registered by Flisk but never started (auto_init=False). Kept so the file loads.
-  redis:
-    image: redis:7-alpine
-    container_name: flisk_agent_stack_redis
-    restart: unless-stopped
-    networks:
-      - backend
 
 volumes:
   flisk_agent_stack_nats_data:
